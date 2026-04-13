@@ -17,10 +17,10 @@ pip install -r requirements.txt
 uvicorn main:app
 ```
 
-### 3. To access page
+### 3. To access page navigate to
 
 ```bash
-(http://127.0.0.1:8000/docs)
+http://127.0.0.1:8000/docs
 ```
 
 ### Frequent Troubleshoot
