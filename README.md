@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ### 2. Start the local server
 
 ```bash
-uvicorn main:app --reload
+uvicorn main:app
 ```
 
 ### 3. To access page
