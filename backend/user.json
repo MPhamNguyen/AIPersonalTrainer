@@ -1,0 +1,68 @@
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "age": "21",
+  "height": "172",
+  "weight": "65",
+  "focusPhase": "Hypertrophy & Strength",
+  "trainingDays": 6,
+  "specificTarget": "Recover from acl tear",
+  "equipment": [
+    {
+      "id": 1,
+      "label": "Barbell",
+      "enabled": true
+    },
+    {
+      "id": 8,
+      "label": "Bench",
+      "enabled": true
+    },
+    {
+      "id": 3,
+      "label": "Dumbbell",
+      "enabled": true
+    },
+    {
+      "id": 4,
+      "label": "Gym mat",
+      "enabled": true
+    },
+    {
+      "id": 9,
+      "label": "Incline bench",
+      "enabled": false
+    },
+    {
+      "id": 10,
+      "label": "Kettlebell",
+      "enabled": true
+    },
+    {
+      "id": 6,
+      "label": "Pull-up bar",
+      "enabled": false
+    },
+    {
+      "id": 11,
+      "label": "Resistance band",
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "label": "SZ-Bar",
+      "enabled": false
+    },
+    {
+      "id": 5,
+      "label": "Swiss Ball",
+      "enabled": false
+    },
+    {
+      "id": 7,
+      "label": "none (bodyweight exercise)",
+      "enabled": true
+    }
+  ],
+  "limitations": "recovering from acl surgery"
+}

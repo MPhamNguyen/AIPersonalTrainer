@@ -4,12 +4,14 @@ import requests
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class WorkoutEngine:
     def __init__(self):
         self.WGER_BASE = "https://wger.de/api/v2"
-        self.client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         self.model_id = "gemini-3-flash-preview"
 
     def get_vetted_exercises(self, equipment_ids):
