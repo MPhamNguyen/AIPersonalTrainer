@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import requests
 from google import genai
 from google.api_core import exceptions
@@ -12,23 +13,47 @@ class WorkoutEngine:
     def __init__(self):
         self.WGER_BASE = "https://wger.de/api/v2"
         self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model_id = "gemini-3-flash-preview"
+        self.model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     def get_vetted_exercises(self, equipment_ids):
         """Fetch real exercise data from Wger API filtered by equipment."""
         try:
             # Fetches 200 exercises instead of 20
-            response = requests.get(f"{self.WGER_BASE}/exercise/?language=2&status=2&limit=200")
+            response = requests.get(f"{self.WGER_BASE}/exerciseinfo/?language=2&limit=200", timeout=10)
             if response.status_code != 200:
                 return []
             
             all_ex = response.json().get('results', [])
 
             # Filter exercises that match the user's available equipment IDs
-            return [e for e in all_ex if any(q in equipment_ids for q in e.get('equipment', []))]
+            return [e for e in all_ex if any(self._equipment_id(q) in equipment_ids for q in e.get('equipment', []))]
         except Exception as e:
             print(f"Wger API Error: {e}")
             return []
+
+    def _equipment_id(self, equipment):
+        if isinstance(equipment, dict):
+            return equipment.get("id")
+        return equipment
+
+    def _english_translation(self, exercise):
+        translations = exercise.get("translations", [])
+        if not translations:
+            return {}
+
+        return next(
+            (translation for translation in translations if translation.get("language") == 2),
+            translations[0],
+        )
+
+    def _exercise_context_item(self, exercise):
+        translation = self._english_translation(exercise)
+        description = re.sub("<[^<]+?>", "", translation.get("description", ""))
+
+        return {
+            "name": translation.get("name", "Unnamed exercise"),
+            "desc": description[:150],
+        }
         
     muscle_groups = {
     "Shoulders": [2],
@@ -44,7 +69,7 @@ class WorkoutEngine:
         
         # Pull relevant exercises to give the AI context for the conversation
         vetted_data = self.get_vetted_exercises(profile['equipment_ids'])
-        exercise_context = [{"name": e['name'], "desc": e['description'][:150]} for e in vetted_data]
+        exercise_context = [self._exercise_context_item(e) for e in vetted_data]
 
         system_instruction = (
             "ROLE: You are a Certified Strength and Conditioning Specialist (CSCS) and AI Personal Trainer.\n"

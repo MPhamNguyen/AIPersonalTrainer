@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import List, Dict
 from pathlib import Path
@@ -162,11 +163,11 @@ async def chat(user_id: int, payload: ChatInput):
     if user_id not in user_db:
         raise HTTPException(status_code=404, detail="User not found. Please onboard first.")
 
-    if user_id not in active_chats:
-        profile = user_db[user_id]
-        active_chats[user_id] = engine.start_chat_session(profile)
-
     try:
+        if user_id not in active_chats:
+            profile = user_db[user_id]
+            active_chats[user_id] = engine.start_chat_session(profile)
+
         session = active_chats[user_id]
         response = session.send_message(payload.message)
         return {
@@ -175,6 +176,31 @@ async def chat(user_id: int, payload: ChatInput):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/chat-stream/{user_id}")
+async def chat_stream(user_id: int, payload: ChatInput):
+    if user_id not in user_db:
+        raise HTTPException(status_code=404, detail="User not found. Please onboard first.")
+
+    def trainer_reply_stream():
+        try:
+            if user_id not in active_chats:
+                profile = user_db[user_id]
+                active_chats[user_id] = engine.start_chat_session(profile)
+
+            session = active_chats[user_id]
+            for chunk in session.send_message_stream(payload.message):
+                if chunk.text:
+                    yield chunk.text
+        except Exception as e:
+            yield f"I could not reach the trainer service. {str(e)}"
+
+    return StreamingResponse(
+        trainer_reply_stream(),
+        media_type="text/plain; charset=utf-8",
+        headers={"Cache-Control": "no-cache"},
+    )
 
 
 @app.post("/track-progress/{user_id}")

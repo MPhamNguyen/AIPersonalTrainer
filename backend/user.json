@@ -1,7 +1,7 @@
 {
   "firstName": "John",
   "lastName": "Doe",
-  "age": "21",
+  "age": "35",
   "height": "172",
   "weight": "65",
   "focusPhase": "Hypertrophy & Strength",
@@ -64,5 +64,5 @@
       "enabled": true
     }
   ],
-  "limitations": "recovering from acl surgery"
+  "limitations": "recovering from acl surgery\n"
 }
