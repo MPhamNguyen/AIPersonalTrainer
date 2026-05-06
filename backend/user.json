@@ -1,12 +1,13 @@
 {
-  "firstName": "John",
-  "lastName": "Doe",
-  "age": "35",
-  "height": "172",
-  "weight": "65",
+  "firstName": "Minh",
+  "lastName": "Pham-Nguyen",
+  "age": "20",
+  "height": "173",
+  "weight": "54.43",
   "focusPhase": "Hypertrophy & Strength",
-  "trainingDays": 6,
-  "specificTarget": "Recover from acl tear",
+  "trainingDays": 4,
+  "specificTarget": "I want to target my shoulders and biceps.",
+  "limitations": "My arms are currently really sore. I have really bad cardio.",
   "equipment": [
     {
       "id": 1,
@@ -36,7 +37,7 @@
     {
       "id": 10,
       "label": "Kettlebell",
-      "enabled": true
+      "enabled": false
     },
     {
       "id": 6,
@@ -46,7 +47,7 @@
     {
       "id": 11,
       "label": "Resistance band",
-      "enabled": true
+      "enabled": false
     },
     {
       "id": 2,
@@ -64,5 +65,5 @@
       "enabled": true
     }
   ],
-  "limitations": "recovering from acl surgery\n"
+  "goal": "Hypertrophy & Strength: I want to target my shoulders and biceps."
 }

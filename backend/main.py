@@ -26,27 +26,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-class UserOnboard(BaseModel):
-    user_id: int
-    goal: str
-    injuries: List[str]
-    equipment_ids: List[int]
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "user_id": 0,
-                    "goal": "Fat Loss",
-                    "injuries": ["none"],
-                    "equipment_ids": [3, 7]
-                }
-            ]
-        }
-    }
-
-
 class ChatInput(BaseModel):
     message: str = Field(..., example="Can you give me a dumbbell-only chest workout?")
 
@@ -62,6 +41,10 @@ class EquipmentItem(BaseModel):
     label: str
     enabled: bool
 
+class EquipmentItem(BaseModel):
+    id: int
+    label: str
+    enabled: bool
 
 class UserPreferences(BaseModel):
     firstName: str
@@ -72,8 +55,11 @@ class UserPreferences(BaseModel):
     focusPhase: str
     trainingDays: int
     specificTarget: str
-    equipment: List[EquipmentItem]
     limitations: str
+    
+    equipment: List[EquipmentItem] 
+    
+    goal: str
 
 
 user_db: Dict[int, dict] = {}
@@ -109,19 +95,14 @@ async def get_muscle_list():
         raise HTTPException(status_code=502, detail="Could not reach wger database")
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Muscle API request failed: {str(e)}")
+    
+@app.get("/tester")
+async def tester():
+     return {"message": f"yipeee"}
 
 
-@app.post("/createAccount")
-async def onboard_user(user: UserOnboard):
-    """Saves the user profile to memory."""
-    user_db[user.user_id] = user.model_dump()
-    if user.user_id in active_chats:
-        del active_chats[user.user_id]
-    return {"message": f"Profile for User {user.user_id} saved successfully."}
-
-
-@app.post("/save-preferences")
-async def save_preferences(preferences: UserPreferences):
+@app.post("/save-preferences/{user_id}")
+async def save_preferences(user_id: int, preferences: UserPreferences):
     """Saves frontend profile/preferences to backend/user.json."""
     try:
         base_dir = Path(__file__).resolve().parent
@@ -129,6 +110,12 @@ async def save_preferences(preferences: UserPreferences):
 
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(preferences.model_dump(), f, indent=2, ensure_ascii=False)
+
+        user_db[user_id] = preferences.model_dump()
+
+        if user_id in active_chats:
+            del active_chats[user_id]
+            print(f"Session for user {user_id} cleared. AI context will refresh on next message.")
 
         return {
             "message": "Preferences saved successfully.",

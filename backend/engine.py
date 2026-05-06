@@ -68,13 +68,19 @@ class WorkoutEngine:
         """Initialize Gemini chat with a personal trainer persona."""
         
         # Pull relevant exercises to give the AI context for the conversation
-        vetted_data = self.get_vetted_exercises(profile['equipment_ids'])
+
+        enabled_ids = [
+            item['id'] for item in profile['equipment'] 
+            if item.get('enabled') == True
+        ]
+
+        vetted_data = self.get_vetted_exercises(enabled_ids)
         exercise_context = [self._exercise_context_item(e) for e in vetted_data]
 
         system_instruction = (
             "ROLE: You are a Certified Strength and Conditioning Specialist (CSCS) and AI Personal Trainer.\n"
             f"USER CONTEXT: Goal: {profile['goal']} | Experience: {profile.get('experience', 'Unknown')}.\n"
-            f"INJURY DATA: {', '.join(profile['injuries']) if profile['injuries'] else 'None'}.\n"
+            f"INJURY DATA: {', '.join(profile['limitations']) if profile['limitations'] else 'None'}.\n"
             
             "STRICT SAFETY & MUSCLE GROUP RULES:\n"
             "1. If a user mentions an injury to a body part, you must cross-reference it with these muscle groups and AVOID corresponding exercises:\n"

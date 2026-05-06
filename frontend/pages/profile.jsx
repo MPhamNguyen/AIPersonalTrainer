@@ -132,40 +132,28 @@ const Profile = () => {
     return {
       user_id: CHAT_USER_ID,
       goal: target ? `${focusPhase}: ${target}` : focusPhase,
-      injuries: injuryNotes ? [injuryNotes] : ["none"],
-      equipment_ids: getEnabledEquipmentIds(),
+      // injuries: injuryNotes ? [injuryNotes] : ["none"],
+      // equipment_ids: getEnabledEquipmentIds(),
     };
   };
 
-  const updateTrainerContext = async () => {
-    const res = await fetch(`${API_BASE}/createAccount`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(buildTrainerProfile()),
-    });
+  const tester = async () => {
+    const res = await fetch(`${API_BASE}/tester`);
 
     if (!res.ok) {
-      const detail = await res.json().catch(() => null);
-      throw new Error(detail?.detail ?? "Failed to update trainer context");
+      throw new Error(`HTTP error! status: ${res.status}`);;
     }
 
-    setChatReady(true);
-    setChatStatus("AI context updated.");
-  };
+    const data = await res.json();
 
-  const handleUpdateContext = async () => {
-    try {
-      setChatStatus("Updating AI context...");
-      await updateTrainerContext();
-    } catch (err) {
-      console.error(err);
-      setChatStatus(err.message);
-    }
+    console.log(data.message); 
+
+    setChatStatus("Tester Function. Check console.");
   };
 
   const handleSave = async () => {
+    const profile = buildTrainerProfile();
+
     const payload = {
       firstName,
       lastName,
@@ -175,12 +163,15 @@ const Profile = () => {
       focusPhase,
       trainingDays,
       specificTarget,
-      equipment,
       limitations,
+
+      equipment: equipment,
+      
+      goal: profile.goal,
     };
 
     try {
-      const res = await fetch(`${API_BASE}/save-preferences`, {
+      const res = await fetch(`${API_BASE}/save-preferences/${CHAT_USER_ID}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -193,6 +184,7 @@ const Profile = () => {
       }
 
       setSaved(true);
+      setChatReady(true)
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       console.error(err);
@@ -256,10 +248,10 @@ const Profile = () => {
     ]);
 
     try {
-      if (!chatReady) {
-        setChatStatus("Updating AI context...");
-        await updateTrainerContext();
-      }
+      // if (!chatReady) {
+      //   setChatStatus("Updating AI context...");
+      //   await updateTrainerContext();
+      // }
 
       setChatStatus("Trainer is writing...");
       const res = await fetch(`${API_BASE}/chat-stream/${CHAT_USER_ID}`, {
@@ -335,13 +327,6 @@ const Profile = () => {
               Configure your identity, goals, and training environment.
             </p>
           </div>
-          <button
-            onClick={handleUpdateContext}
-            style={styles.updateBtn}
-            disabled={loading}
-          >
-            <span style={{ marginRight: 6 }}>⟳</span> UPDATE AI CONTEXT
-          </button>
         </div>
 
         <div className="layout-grid">
@@ -498,7 +483,7 @@ const Profile = () => {
                   <span style={styles.cardTitleIcon}>AI</span> Trainer Chat
                 </h2>
                 <span style={styles.chatStatus}>
-                  {chatStatus || (chatReady ? "Ready" : "Needs context")}
+                  {chatStatus || (chatReady ? "Ready" : "Not Ready. Save Preferences!")}
                 </span>
               </div>
               <div ref={chatWindowRef} style={styles.chatWindow}>
