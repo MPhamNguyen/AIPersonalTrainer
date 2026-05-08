@@ -35,14 +35,17 @@ class WorkoutEngine:
                     
                     next_url = data.get('next')
 
-                # Filter exercises that match the user's available equipment IDs
-                return [
-                    e for e in all_ex 
-                    if any(self._equipment_id(q) in equipment_ids for q in e.get('equipment', []))
-                ]
+                    self._cached_exercises = all_ex
+
             except Exception as e:
                 print(f"Wger API Error: {e}")
                 return []
+            
+        # Filter exercises that match the user's available equipment IDs
+        return [
+            e for e in self._cached_exercises
+            if any(self._equipment_id(q) in equipment_ids for q in e.get('equipment', []))
+        ]
 
     def _equipment_id(self, equipment):
         if isinstance(equipment, dict):
