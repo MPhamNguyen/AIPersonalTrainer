@@ -14,22 +14,35 @@ class WorkoutEngine:
         self.WGER_BASE = "https://wger.de/api/v2"
         self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         self.model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        self._cached_exercises = []
 
     def get_vetted_exercises(self, equipment_ids):
         """Fetch real exercise data from Wger API filtered by equipment."""
-        try:
-            # Fetches 200 exercises instead of 20
-            response = requests.get(f"{self.WGER_BASE}/exerciseinfo/?language=2&limit=200", timeout=10)
-            if response.status_code != 200:
-                return []
-            
-            all_ex = response.json().get('results', [])
 
-            # Filter exercises that match the user's available equipment IDs
-            return [e for e in all_ex if any(self._equipment_id(q) in equipment_ids for q in e.get('equipment', []))]
-        except Exception as e:
-            print(f"Wger API Error: {e}")
-            return []
+        if not self._cached_exercises:
+            all_ex = []
+            next_url = f"{self.WGER_BASE}/exerciseinfo/?language=2&limit=200"
+
+            try:
+                while next_url:
+                    response = requests.get(next_url, timeout=10)
+                    
+                    if response.status_code != 200:
+                        break 
+                    
+                    data = response.json()
+                    all_ex.extend(data.get('results', []))
+                    
+                    next_url = data.get('next')
+
+                # Filter exercises that match the user's available equipment IDs
+                return [
+                    e for e in all_ex 
+                    if any(self._equipment_id(q) in equipment_ids for q in e.get('equipment', []))
+                ]
+            except Exception as e:
+                print(f"Wger API Error: {e}")
+                return []
 
     def _equipment_id(self, equipment):
         if isinstance(equipment, dict):
