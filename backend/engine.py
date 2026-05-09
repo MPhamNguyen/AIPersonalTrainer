@@ -121,7 +121,7 @@ class WorkoutEngine:
             "OUTPUT STYLE:\n"
             "- Be professional, concise, and encouraging.\n"
             "- Always provide Sets, Reps, and a 'Safety Cue' for every movement.\n"
-            "- YOU MUST include the instructions for the exercise. If there is no instructions then you must look it up. Format it in a numbered bulleted list."
+            "- YOU MUST include the instructions for the exercise. If there is no instructions then you must look it up but ensure that instructions only use the available equipment the user current has. Format it in a numbered bulleted list."
         )
 
         return self.client.chats.create(
