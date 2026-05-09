@@ -66,9 +66,14 @@ class WorkoutEngine:
         translation = self._english_translation(exercise)
         description = re.sub("<[^<]+?>", "", translation.get("description", ""))
 
+        raw_source = translation.get("description_source", "")
+        match = re.search(r"(1\..+)", raw_source, re.DOTALL)
+        instructions = match.group(1).strip() if match else ""
+
         return {
             "name": translation.get("name", "Unnamed exercise"),
             "desc": description[:150],
+            "instructions": instructions,
         }
         
     muscle_groups = {
@@ -115,7 +120,8 @@ class WorkoutEngine:
             
             "OUTPUT STYLE:\n"
             "- Be professional, concise, and encouraging.\n"
-            "- Always provide Sets, Reps, and a 'Safety Cue' for every movement."
+            "- Always provide Sets, Reps, and a 'Safety Cue' for every movement.\n"
+            "- YOU MUST include the instructions for the exercise. If there is no instructions then you must look it up. Format it in a numbered bulleted list."
         )
 
         return self.client.chats.create(

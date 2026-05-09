@@ -105,7 +105,7 @@ const Profile = () => {
 
   useEffect(() => {
     setChatReady(false);
-  }, [focusPhase, specificTarget, limitations, equipment]);
+  }, [focusPhase, specificTarget, limitations, equipment, trainingDays, height, weight, age]);
 
   useEffect(() => {
     if (chatWindowRef.current) {
@@ -248,10 +248,10 @@ const Profile = () => {
     ]);
 
     try {
-      // if (!chatReady) {
-      //   setChatStatus("Updating AI context...");
-      //   await updateTrainerContext();
-      // }
+      if (!chatReady) {
+        setChatStatus("Saving Preferences...");
+        await handleSave();
+      }
 
       setChatStatus("Trainer is writing...");
       const res = await fetch(`${API_BASE}/chat-stream/${CHAT_USER_ID}`, {
